@@ -1,0 +1,33 @@
+FROM     ubuntu:12.04
+
+ENV BUILD llvm-3.5
+ENV FEELPP_CXX clang++-3.5
+ENV FEELPP_CC clang-3.5
+ENV BUILDTYPE Release
+ENV TARGET quickstart
+ENV CXXFLAGS -O2
+
+ENV CC clang
+ENV CXX clang++
+
+RUN apt-get -qq update
+RUN apt-get install -y python-software-properties wget 
+RUN add-apt-repository -y ppa:boost-latest/ppa
+RUN add-apt-repository -y ppa:kalakris/eigen
+RUN add-apt-repository -y ppa:feelpp/petsc
+RUN apt-add-repository --yes ppa:ubuntu-toolchain-r/test
+RUN apt-add-repository 'deb http://llvm.org/apt/precise/ llvm-toolchain-precise main'
+RUN apt-add-repository 'deb http://llvm.org/apt/precise/ llvm-toolchain-precise-3.4 main'
+RUN apt-add-repository 'deb http://llvm.org/apt/precise/ llvm-toolchain-precise-3.5 main'
+RUN wget -O - http://llvm.org/apt/llvm-snapshot.gpg.key | apt-key add -
+RUN apt-get -qq update
+RUN apt-get install -y -qq cmake git make vim
+RUN apt-get install -y -qq ${FEELPP_CC}
+RUN apt-get install -y -qq libboost1.55-all-dev mpi-default-dev mpi-default-bin libeigen3-dev libpetsc3.4.2-dev libcln-dev petsc-dev libxml2-dev gmsh bison flex doxygen doxygen-latex transfig imagemagick libtbb-dev libann-dev libglpk-dev automake libtool
+RUN git clone --depth=1 --branch=develop git://github.com/feelpp/feelpp.git /src/feelpp
+RUN mkdir -p /build/opt-${BUILD} && cd /build/opt-${BUILD} && /src/feelpp/configure --build=${BUILDTYPE} -v --cxxflags=${CXXFLAGS}
+RUN make -j 16 feelpp_ginac
+RUN make -j 2 feelpp
+RUN make ${TARGET}-check
+
+CMD ["/usr/sbin/sshd", "-D"]
