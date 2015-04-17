@@ -1,0 +1,29 @@
+FROM ubuntu:14.04.2
+
+ENV BUILD llvm-3.5
+ENV FEELPP_CXX clang++-3.5
+ENV FEELPP_CC clang-3.5
+ENV BUILDTYPE Release
+ENV TARGET quickstart
+ENV CXXFLAGS -O2
+
+ENV CC ${FEELPP_CC}
+ENV CXX ${FEELPP_CXX}
+
+RUN apt-get -qq update
+RUN apt-get install -y -qq cmake git make vim automake libtool
+RUN apt-get install -y -qq ${FEELPP_CC} mpi-default-dev mpi-default-bin 
+RUN apt-get install -y -qq bison flex
+# RUN apt-get install -y -qq doxygen gmsh transfig imagemagick
+RUN apt-get install -y -qq libboost1.55-all-dev libhdf5-mpi-dev libxml2-dev 
+# RUN apt-get install -y -qq libcln-dev libann-dev libglpk-dev
+RUN apt-get install -y -qq libeigen3-dev petsc-dev libgmsh-dev gmsh
+
+RUM mkdir /src
+RUN git clone --depth=1 --branch=develop git://github.com/feelpp/feelpp.git /src/feelpp
+# RUN mkdir -p /build/opt-${BUILD} && cd /build/opt-${BUILD} && /src/feelpp/configure --build=${BUILDTYPE} -v --cxxflags=${CXXFLAGS}
+# RUN make -j 16 feelpp_ginac
+# RUN make -j 2 feelpp
+# RUN make ${TARGET}-check
+
+CMD ["/usr/sbin/sshd", "-D"]
